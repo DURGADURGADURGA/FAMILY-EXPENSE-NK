@@ -1,2 +1,6 @@
 streamlit
 firebase-admin
+pandas
+plotly
+reportlab
+pillow
