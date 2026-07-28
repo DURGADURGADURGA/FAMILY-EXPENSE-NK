@@ -1,181 +1,303 @@
-import os
-import streamlit as st
-import pyrebase
+# firebase.py
+
 import firebase_admin
+from firebase_admin import credentials, firestore, auth
+import streamlit as st
+from datetime import datetime
+import uuid
 
-from dotenv import load_dotenv
-from firebase_admin import credentials
-from firebase_admin import firestore
-from firebase_admin import auth as admin_auth
-
-load_dotenv()
-
-firebase_config = {
-    "apiKey": os.getenv("FIREBASE_API_KEY"),
-    "authDomain": os.getenv("FIREBASE_AUTH_DOMAIN"),
-    "projectId": os.getenv("FIREBASE_PROJECT_ID"),
-    "storageBucket": os.getenv("FIREBASE_STORAGE_BUCKET"),
-    "messagingSenderId": os.getenv("FIREBASE_MESSAGING_SENDER_ID"),
-    "appId": os.getenv("FIREBASE_APP_ID"),
-}
-
-firebase = pyrebase.initialize_app(firebase_config)
-
-auth = firebase.auth()
+# ---------------------------------------------------
+# Firebase Initialization
+# ---------------------------------------------------
 
 if not firebase_admin._apps:
-
-    if "FIREBASE_SERVICE_ACCOUNT" not in st.secrets:
-        st.error("Firebase Service Account Missing")
-        st.stop()
-
-    cred = credentials.Certificate(
-        dict(st.secrets["FIREBASE_SERVICE_ACCOUNT"])
-    )
-
+    cred = credentials.Certificate("serviceAccountKey.json")
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
 
-# -----------------------------
-# COLLECTIONS
-# -----------------------------
+# ---------------------------------------------------
+# Collection Names
+# ---------------------------------------------------
 
-USERS = db.collection("users")
-
-FAMILIES = db.collection("families")
-
-EXPENSES = db.collection("expenses")
-
-INCOME = db.collection("income")
-
-WALLETS = db.collection("wallets")
-
-GOALS = db.collection("goals")
-
-LOANS = db.collection("loans")
-
-BUDGETS = db.collection("budgets")
-
-REPORTS = db.collection("reports")
-
-NOTIFICATIONS = db.collection("notifications")
+COL_USERS = "users"
+COL_FAMILIES = "families"
+COL_INCOME = "income"
+COL_EXPENSE = "expenses"
+COL_BUDGET = "budgets"
+COL_GOALS = "goals"
+COL_LOANS = "loans"
+COL_WALLET = "wallets"
+COL_REPORTS = "reports"
+COL_NOTIFICATION = "notifications"
 
 
-# -----------------------------
-# USER
-# -----------------------------
+# ---------------------------------------------------
+# USER FUNCTIONS
+# ---------------------------------------------------
 
 def create_user(uid, data):
-    USERS.document(uid).set(data)
+    db.collection(COL_USERS).document(uid).set(data)
 
 
 def get_user(uid):
-    doc = USERS.document(uid).get()
-
+    doc = db.collection(COL_USERS).document(uid).get()
     if doc.exists:
         return doc.to_dict()
-
     return None
 
 
 def update_user(uid, data):
-    USERS.document(uid).update(data)
+    db.collection(COL_USERS).document(uid).update(data)
 
 
-# -----------------------------
+def delete_user(uid):
+    db.collection(COL_USERS).document(uid).delete()
+
+
+# ---------------------------------------------------
 # FAMILY
-# -----------------------------
+# ---------------------------------------------------
 
-def create_family(code, data):
-    FAMILIES.document(code).set(data)
+def create_family(family_code, data):
+    db.collection(COL_FAMILIES).document(family_code).set(data)
 
 
-def get_family(code):
-    doc = FAMILIES.document(code).get()
+def get_family(family_code):
+    doc = db.collection(COL_FAMILIES).document(family_code).get()
+    if doc.exists:
+        return doc.to_dict()
+    return None
+
+
+# ---------------------------------------------------
+# INCOME
+# ---------------------------------------------------
+
+def add_income(data):
+
+    data["created_at"] = datetime.utcnow()
+
+    data["income_id"] = str(uuid.uuid4())
+
+    db.collection(COL_INCOME).document(
+        data["income_id"]
+    ).set(data)
+
+
+def get_income(family_code):
+
+    docs = (
+        db.collection(COL_INCOME)
+        .where("family_code", "==", family_code)
+        .stream()
+    )
+
+    return [doc.to_dict() for doc in docs]
+
+
+# ---------------------------------------------------
+# EXPENSE
+# ---------------------------------------------------
+
+def add_expense(data):
+
+    data["created_at"] = datetime.utcnow()
+
+    data["expense_id"] = str(uuid.uuid4())
+
+    db.collection(COL_EXPENSE).document(
+        data["expense_id"]
+    ).set(data)
+
+
+def get_expense(family_code):
+
+    docs = (
+        db.collection(COL_EXPENSE)
+        .where("family_code", "==", family_code)
+        .stream()
+    )
+
+    return [doc.to_dict() for doc in docs]
+
+
+# ---------------------------------------------------
+# BUDGET
+# ---------------------------------------------------
+
+def save_budget(data):
+
+    budget_id = str(uuid.uuid4())
+
+    data["budget_id"] = budget_id
+
+    db.collection(COL_BUDGET).document(budget_id).set(data)
+
+
+def get_budget(family_code):
+
+    docs = (
+        db.collection(COL_BUDGET)
+        .where("family_code", "==", family_code)
+        .stream()
+    )
+
+    return [doc.to_dict() for doc in docs]
+
+
+# ---------------------------------------------------
+# GOALS
+# ---------------------------------------------------
+
+def add_goal(data):
+
+    goal_id = str(uuid.uuid4())
+
+    data["goal_id"] = goal_id
+
+    db.collection(COL_GOALS).document(goal_id).set(data)
+
+
+def get_goals(family_code):
+
+    docs = (
+        db.collection(COL_GOALS)
+        .where("family_code", "==", family_code)
+        .stream()
+    )
+
+    return [doc.to_dict() for doc in docs]
+
+
+# ---------------------------------------------------
+# LOANS
+# ---------------------------------------------------
+
+def add_loan(data):
+
+    loan_id = str(uuid.uuid4())
+
+    data["loan_id"] = loan_id
+
+    db.collection(COL_LOANS).document(loan_id).set(data)
+
+
+def get_loans(family_code):
+
+    docs = (
+        db.collection(COL_LOANS)
+        .where("family_code", "==", family_code)
+        .stream()
+    )
+
+    return [doc.to_dict() for doc in docs]
+
+
+# ---------------------------------------------------
+# WALLET
+# ---------------------------------------------------
+
+def update_wallet(family_code, amount):
+
+    wallet = db.collection(COL_WALLET).document(family_code)
+
+    doc = wallet.get()
+
+    if doc.exists:
+
+        old = doc.to_dict()
+
+        balance = old.get("balance", 0)
+
+        wallet.update(
+            {
+                "balance": balance + amount
+            }
+        )
+
+    else:
+
+        wallet.set(
+            {
+                "family_code": family_code,
+                "balance": amount,
+            }
+        )
+
+
+def get_wallet(family_code):
+
+    doc = db.collection(COL_WALLET).document(family_code).get()
 
     if doc.exists:
         return doc.to_dict()
 
-    return None
+    return {"balance": 0}
 
 
-# -----------------------------
-# EXPENSE
-# -----------------------------
+# ---------------------------------------------------
+# REPORT
+# ---------------------------------------------------
 
-def add_expense(data):
-    EXPENSES.add(data)
+def get_total_income(family_code):
 
+    data = get_income(family_code)
 
-def get_expenses(family_code):
-    docs = EXPENSES.where(
-        "family_code", "==", family_code
-    ).stream()
-
-    return [d.to_dict() for d in docs]
+    return sum(i["amount"] for i in data)
 
 
-# -----------------------------
-# INCOME
-# -----------------------------
+def get_total_expense(family_code):
 
-def add_income(data):
-    INCOME.add(data)
+    data = get_expense(family_code)
 
-
-def get_income(family_code):
-    docs = INCOME.where(
-        "family_code", "==", family_code
-    ).stream()
-
-    return [d.to_dict() for d in docs]
+    return sum(i["amount"] for i in data)
 
 
-# -----------------------------
-# WALLET
-# -----------------------------
+def get_balance(family_code):
 
-def add_wallet(data):
-    WALLETS.add(data)
+    return get_total_income(family_code) - get_total_expense(family_code)
 
 
-def get_wallets(family_code):
-    docs = WALLETS.where(
-        "family_code", "==", family_code
-    ).stream()
+# ---------------------------------------------------
+# DELETE RECORD
+# ---------------------------------------------------
 
-    return [d.to_dict() for d in docs]
+def delete_document(collection, document_id):
 
-
-# -----------------------------
-# GOALS
-# -----------------------------
-
-def add_goal(data):
-    GOALS.add(data)
+    db.collection(collection).document(document_id).delete()
 
 
-def get_goals(family_code):
-    docs = GOALS.where(
-        "family_code", "==", family_code
-    ).stream()
+# ---------------------------------------------------
+# UPDATE RECORD
+# ---------------------------------------------------
+
+def update_document(collection, document_id, data):
+
+    db.collection(collection).document(document_id).update(data)
+
+
+# ---------------------------------------------------
+# COMMON QUERY
+# ---------------------------------------------------
+
+def get_collection(collection):
+
+    docs = db.collection(collection).stream()
 
     return [d.to_dict() for d in docs]
 
 
-# -----------------------------
-# LOANS
-# -----------------------------
+# ---------------------------------------------------
+# SESSION
+# ---------------------------------------------------
 
-def add_loan(data):
-    LOANS.add(data)
+def check_login():
+
+    return st.session_state.get("logged_in", False)
 
 
-def get_loans(family_code):
-    docs = LOANS.where(
-        "family_code", "==", family_code
-    ).stream()
+def logout():
 
-    return [d.to_dict() for d in docs]
+    st.session_state.clear()
