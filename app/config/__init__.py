@@ -1,3 +1,10 @@
 """
-Configuration package for Family Expense Manager Pro.
+=========================================================
+Family Expense Manager Pro
+Configuration Package
+=========================================================
 """
+
+from .config import Config
+
+config = Config()
