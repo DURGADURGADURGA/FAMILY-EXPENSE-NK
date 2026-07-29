@@ -1,20 +1,71 @@
+# ================================
+# Family Expense Manager Pro
+# Production Requirements
+# ================================
+
+# Streamlit
 streamlit>=1.50.0
-firebase-admin
-pyrebase4
-plotly
-pandas
-numpy
-Pillow
-reportlab
-openpyxl
-python-dotenv
-bcrypt
-streamlit-option-menu
-streamlit-extras
-extra-streamlit-components
-streamlit-card
-google-generativeai
-requests
-qrcode
-opencv-python-headless
-easyocr
+streamlit-option-menu>=0.4.0
+streamlit-extras>=0.7.6
+streamlit-aggrid>=1.1.8
+streamlit-lottie>=0.0.5
+streamlit-card>=1.0.2
+extra-streamlit-components>=0.1.80
+
+# Firebase
+firebase-admin>=6.9.0
+pyrebase4>=4.8.0
+
+# Database
+google-cloud-firestore>=2.21.0
+
+# Environment
+python-dotenv>=1.1.1
+
+# Data Processing
+pandas>=2.3.1
+numpy>=2.3.2
+
+# Charts
+plotly>=6.3.0
+
+# Images
+Pillow>=11.3.0
+
+# PDF Export
+reportlab>=4.4.3
+
+# Excel Export
+openpyxl>=3.1.5
+xlsxwriter>=3.2.5
+
+# AI
+google-generativeai>=0.8.5
+
+# OCR
+opencv-python-headless>=4.12.0.88
+easyocr>=1.7.2
+
+# QR Code
+qrcode>=8.2
+
+# Security
+bcrypt>=4.3.0
+
+# HTTP
+requests>=2.32.4
+
+# Date
+python-dateutil>=2.9.0.post0
+
+# Timezone
+pytz>=2025.2
+
+# Logging
+rich>=14.1.0
+
+# Validation
+pydantic>=2.11.7
+
+# Utilities
+typing_extensions>=4.15.0
