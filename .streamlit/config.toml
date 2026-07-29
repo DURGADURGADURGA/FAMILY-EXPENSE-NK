@@ -1,14 +1,33 @@
+# ==================================================
+# Family Expense Manager Pro
+# Streamlit Production Configuration
+# ==================================================
+
 [theme]
-primaryColor="#00C853"
-backgroundColor="#F6F8FC"
-secondaryBackgroundColor="#FFFFFF"
-textColor="#111827"
-font="sans serif"
+primaryColor = "#2563EB"
+backgroundColor = "#F8FAFC"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#111827"
+font = "sans serif"
 
 [server]
-headless=true
-enableCORS=false
-enableXsrfProtection=false
+headless = true
+enableCORS = false
+enableXsrfProtection = true
+runOnSave = true
+maxUploadSize = 200
+maxMessageSize = 200
 
 [browser]
-gatherUsageStats=false
+gatherUsageStats = false
+serverAddress = "localhost"
+
+[client]
+toolbarMode = "minimal"
+
+[logger]
+level = "info"
+
+[runner]
+magicEnabled = true
+fastReruns = true
